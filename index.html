@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <title>Премијер Лига - Систем за евиденцију клубова</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-light">
+
+    <nav class="navbar navbar-dark bg-dark mb-4">
+        <div class="container">
+            <span class="navbar-brand mb-0 h1">⚽ Евиденција Клубова Премијер Лиге</span>
+            <a href="logout.php" class="btn btn-outline-danger btn-sm">Одјави се</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col text-center">
+                <button id="btnDodajPacijenta" class="btn btn-primary mx-2">Додај нови клуб</button>
+                <button id="btnPrikaziPacijente" class="btn btn-secondary mx-2">Прикажи све клубове</button>
+            </div>
+        </div>
+
+        <section id="formaSekcija" class="card p-4 shadow mb-4">
+            <h4 class="mb-3 text-primary">Унос новог фудбалског клуба</h4>
+            <form id="patientForm" enctype="multipart/form-data" class="row g-3">
+                <div class="col-md-6">
+                    <label for="ime" class="form-label">Назив клуба:</label>
+                    <input type="text" id="ime" name="ime" class="form-control" placeholder="нпр. Arsenal, Manchester United..." required>
+                </div>
+                <div class="col-md-3">
+                    <label for="godine" class="form-label">Година оснивања:</label>
+                    <input type="number" id="godine" name="godine" class="form-control" placeholder="нпр. 1886" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label d-block">Примарни стадион:</label>
+                    <div class="form-check form-check-inline mt-2">
+                        <input class="form-check-input" type="radio" name="pol" id="muski" value="Сопствени стадион" checked>
+                        <label class="form-check-label" for="muski">Сопствени</label>
+                    </div>
+                    <div class="form-check form-check-inline mt-2">
+                        <input class="form-check-input" type="radio" name="pol" id="zenski" value="Градски / Изнајмљен">
+                        <label class="form-check-label" for="zenski">Градски</label>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <label for="visina" class="form-label">Број одиграних пораза:</label>
+                    <input type="number" id="visina" name="visina" class="form-control" placeholder="Унесите број пораза" required>
+                </div>
+                <div class="col-md-4">
+                    <label for="tezina" class="form-label">Број одиграних победа:</label>
+                    <input type="number" id="tezina" name="tezina" class="form-control" placeholder="Унесите број победа" required>
+                </div>
+                <div class="col-md-4">
+                    <label for="slika" class="form-label">Грб клуба (лого):</label>
+                    <input type="file" id="slika" name="slika" class="form-control" accept="image/*">
+                </div>
+                <div class="col-12">
+                    <label for="napomena" class="form-label">Историјат / Напомена о стручном штабу:</label>
+                    <textarea id="napomena" name="napomena" class="form-control" rows="3" placeholder="Унесите додатне детаље о клубу, менаџеру..."></textarea>
+                </div>
+                <div class="col-12 text-end">
+                    <button type="submit" class="btn btn-success px-4">Сачувај клуб у базу</button>
+                </div>
+            </form>
+        </section>
+
+        <section id="pacijentiSekcija" class="d-none mt-4">
+            <div class="card p-3 shadow mb-4 bg-dark text-white">
+                <div class="row g-3 align-items-center">
+                    <div class="col-md-4">
+                        <label for="filterKategorija" class="form-label">Филтрирај по ПЛ рангу (Проценат успешности):</label>
+                        <select id="filterKategorija" class="form-select text-dark">
+                            <option value="Sve">Све категорије</option>
+                            <option value="Pothranjenost">Борба за опстанак (<35%)</option>
+                            <option value="Normalna težina">Средина табеле (35% - 55%)</option>
+                            <option value="Prekomerna težina">Лига Шампиона (55% - 70%)</option>
+                            <option value="Gojaznost">Кандидат за Титулу (>70%)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="sortiranje" class="form-label">Сортирај по проценту успешности:</label>
+                        <select id="sortiranje" class="form-select text-dark">
+                            <option value="bez">Без сортирања</option>
+                            <option value="min-max">Успешност: Од мање ка већој</option>
+                            <option value="max-min">Успешност: Од веће ка мањој</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 text-md-end mt-4">
+                        <button id="btnPrimeni" class="btn btn-warning px-4 fw-bold">Примени филтере</button>
+                        <div class="mt-2 text-warning fw-bold"><span id="brojPacijenata">0</span> клубова приказано</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="patientsContainer" class="row g-4"></div>
+        </section>
+    </div>
+
+    <div class="modal fade" id="modalUredi" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Измена података о клубу</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editForm" enctype="multipart/form-data" class="row g-3">
+                        <input type="hidden" id="editId" name="id">
+                        
+                        <div class="col-md-6">
+                            <label for="editIme" class="form-label">Назив клуба:</label>
+                            <input type="text" id="editIme" name="ime" class="form-control" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="editGodine" class="form-label">Година оснивања:</label>
+                            <input type="number" id="editGodine" name="godine" class="form-control" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label d-block">Стадион:</label>
+                            <div class="form-check form-check-inline mt-2">
+                                <input class="form-check-input" type="radio" name="pol" id="editMuski" value="Сопствени стадион">
+                                <label class="form-check-label" for="editMuski">Сопствени</label>
+                            </div>
+                            <div class="form-check form-check-inline mt-2">
+                                <input class="form-check-input" type="radio" name="pol" id="editZenski" value="Градски / Изнајмљен">
+                                <label class="form-check-label" for="editZenski">Градски</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="editVisina" class="form-label">Број пораза:</label>
+                            <input type="number" id="editVisina" name="visina" class="form-control" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="editTezina" class="form-label">Број победа:</label>
+                            <input type="number" id="editTezina" name="tezina" class="form-control" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="editSlika" class="form-label">Нови грб клуба (опционо):</label>
+                            <input type="file" id="editSlika" name="slika" class="form-control" accept="image/*">
+                        </div>
+                        <div class="col-12">
+                            <label for="editNapomena" class="form-label">Напомена:</label>
+                            <textarea id="editNapomena" name="napomena" class="form-control" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Откажи</button>
+                    <button type="button" id="btnSacuvajIzmene" class="btn btn-primary">Сачувај измене</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

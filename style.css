@@ -1,0 +1,27 @@
+.line-pothranjenost {
+    border-left: 6px solid #dc3545 !important; /* Црвена за испадање */
+}
+.line-normalna {
+    border-left: 6px solid #6c757d !important; /* Сива за средину табеле */
+}
+.line-prekomerna {
+    border-left: 6px solid #0dcaf0 !important; /* Плава за ЛШ */
+}
+.line-gojaznost {
+    border-left: 6px solid #ffc107 !important; /* Златна за Шампиона */
+}
+
+.slika-pacijenta {
+    height: 200px;
+    object-fit: contain;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.card {
+    transition: transform 0.2s ease;
+}
+.card:hover {
+    transform: scale(1.02);
+}
